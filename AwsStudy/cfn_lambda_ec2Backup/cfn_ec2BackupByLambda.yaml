@@ -1,0 +1,90 @@
+Description: Lambda creation
+
+# ------------
+# Parameters
+# ------------
+Parameters:
+  S3Bucket:
+    Default: "bucket-cfn-lambda-ec2backup-220211"
+    Type: String
+  S3Key:
+    Default: "lambda_ec2BackupByEvent.zip"
+    Type: String
+  S3ObjectVersion:
+    Default: "VyuEgVXXFmEfA0CHrCDBg.XE.F9ROsvz"
+    Type: String
+
+# ------------
+# Resources
+# ------------
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:*
+            Resource: arn:aws:logs:*:*:*
+          - Effect: Allow
+            Action:
+            - xray:PutTraceSegment
+            - xray:PutTelemetryRecords
+            - xray:GetSamplingRules
+            - xray:GetSamplingTargets
+            - xray:GetSamplingStatisticSummaries
+            Resource: "*"
+          - Effect: Allow
+            Action:
+            - s3:Get*
+            - s3:List*
+            Resource: "*"
+    
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: lambda_ec2BackupByEvent.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: !Ref S3Bucket
+        S3Key: !Ref S3Key
+        S3ObjectVersion: !Ref S3ObjectVersion
+      Runtime: python3.9
+      Timeout: 10
+      TracingConfig:
+        Mode: Active
+
+  Ec2StopEvent:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: EC2StopTerminateEvent
+      Description: Ec2 Stop Event & trigger backup lambda function
+      EventPattern:
+        source:
+          - aws.ec2
+        detail-type:
+          - EC2 Instance State-change Notification
+        detail:
+          state:
+          - stopped
+          - terminated
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt LambdaFunction.Arn
+          Id: "eventTargetId"
