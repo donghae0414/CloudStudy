@@ -12,7 +12,7 @@ def backup_instances(ec2_client):
         Filters=[
             {
                 'Name': 'tag:Name',
-                'Values': ["EC2-SAMPLE-DEV-DockerInstance"]
+                'Values': ["EC2-SAMPLE-DEV-DockerInstance"] # specific Instance Name
             }
         ]
     )['Reservations']
