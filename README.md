@@ -1,2 +1,2 @@
 # CloudStudy
-personal CloudStudy Repository
+I'm an engineer interested in AWS, GCP and NCP
