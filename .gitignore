@@ -1,6 +1,8 @@
 /AWSStudy/rootkey.csv
-/AWSStudy/tf_simple_vpc/secret.auto.tfvars
-/AWSStudy/tf_simple_vpc/.terraform
-/AWSStudy/tf_simple_vpc/.terraform.lock.hcl
-/AWSStudy/tf_simple_vpc/terraform.tfstate*
+
 /AWSStudy/AWS-Architecture-Icons
+
+/AWSStudy/*/secret.auto.tfvars
+/AWSStudy/*/.terraform
+/AWSStudy/*/.terraform.lock.hcl
+/AWSStudy/*/terraform.tfstate*
