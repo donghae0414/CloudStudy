@@ -18,18 +18,6 @@ resource "aws_subnet" "sbn-tf-public-2a" {
   }
 }
 
-resource "aws_default_route_table" "rt-public" {
-  default_route_table_id = aws_vpc.vpc-tf.default_route_table_id
-  tags = {
-    Name = var.rt_public_name
-  }
-}
-
-resource "aws_route_table_association" "rtas-tf-public-2a" {
-  subnet_id = aws_subnet.sbn-tf-public-2a.id
-  route_table_id = aws_default_route_table.rt-public.id
-}
-
 resource "aws_internet_gateway" "igw-tf" {
   vpc_id = aws_vpc.vpc-tf.id
   tags = {
@@ -37,10 +25,42 @@ resource "aws_internet_gateway" "igw-tf" {
   }
 }
 
-resource "aws_route" "route-public" {
+resource "aws_default_route_table" "rt-public" {
+  default_route_table_id = aws_vpc.vpc-tf.default_route_table_id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw-tf.id
+  }
+
+  tags = {
+    Name = var.rt_public_name
+  }
+}
+
+# resource "aws_route" "route-public" {
+#   route_table_id = aws_default_route_table.rt-public.id
+#   destination_cidr_block = "0.0.0.0/0"
+#   gateway_id = aws_internet_gateway.igw-tf.id
+# }
+
+resource "aws_route_table_association" "rtas-tf-public-2a" {
+  subnet_id = aws_subnet.sbn-tf-public-2a.id
   route_table_id = aws_default_route_table.rt-public.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id = aws_internet_gateway.igw-tf.id
+}
+
+resource "aws_subnet" "sbn-tf-public-2c" {
+  vpc_id     = aws_vpc.vpc-tf.id
+  cidr_block = var.sbn_var_map["cidr_blocks"]["public-2c"]
+  availability_zone = var.sbn_var_map["az"]["public-2c"]
+  tags = {
+    Name = var.sbn_var_map["names"]["public-2c"]
+  }
+}
+
+resource "aws_route_table_association" "rtas-tf-public-2c" {
+  subnet_id = aws_subnet.sbn-tf-public-2c.id
+  route_table_id = aws_default_route_table.rt-public.id
 }
 
 
@@ -50,21 +70,10 @@ resource "aws_route" "route-public" {
 resource "aws_subnet" "sbn-tf-private-2a" {
   vpc_id     = aws_vpc.vpc-tf.id
   cidr_block = var.sbn_var_map["cidr_blocks"]["private-2a"]
+  availability_zone = var.sbn_var_map["az"]["private-2a"]
   tags = {
     Name = var.sbn_var_map["names"]["private-2a"]
   }
-}
-
-resource "aws_route_table" "rt-tf-private" {
-  vpc_id = aws_vpc.vpc-tf.id
-  tags = {
-    Name = var.rt_private_name
-  }
-}
-
-resource "aws_route_table_association" "rtas-tf-private-2a" {
-  subnet_id = aws_subnet.sbn-tf-private-2a.id
-  route_table_id = aws_route_table.rt-tf-private.id
 }
 
 resource "aws_eip" "eip-nat" {
@@ -76,8 +85,40 @@ resource "aws_nat_gateway" "nat-tf" {
   subnet_id = aws_subnet.sbn-tf-private-2a.id
 }
 
-resource "aws_route" "route-private" {
+resource "aws_route_table" "rt-tf-private" {
+  vpc_id = aws_vpc.vpc-tf.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_nat_gateway.nat-tf.id
+  }
+
+  tags = {
+    Name = var.rt_private_name
+  }
+}
+
+# resource "aws_route" "route-private" {
+#   route_table_id = aws_route_table.rt-tf-private.id
+#   destination_cidr_block = "0.0.0.0/0"
+#   gateway_id = aws_nat_gateway.nat-tf.id
+# }
+
+resource "aws_route_table_association" "rtas-tf-private-2a" {
+  subnet_id = aws_subnet.sbn-tf-private-2a.id
   route_table_id = aws_route_table.rt-tf-private.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id = aws_nat_gateway.nat-tf.id
+}
+
+resource "aws_subnet" "sbn-tf-private-2c" {
+  vpc_id     = aws_vpc.vpc-tf.id
+  cidr_block = var.sbn_var_map["cidr_blocks"]["private-2c"]
+  availability_zone = var.sbn_var_map["az"]["private-2c"]
+  tags = {
+    Name = var.sbn_var_map["names"]["private-2c"]
+  }
+}
+
+resource "aws_route_table_association" "rtas-tf-private-2c" {
+  subnet_id = aws_subnet.sbn-tf-private-2c.id
+  route_table_id = aws_route_table.rt-tf-private.id
 }

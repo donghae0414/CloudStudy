@@ -39,7 +39,7 @@ variable "sbn_var_map" {
       public-2a = "sbn-tf-public-2a"
       public-2c = "sbn-tf-public-2c"
       private-2a = "sbn-tf-private-2a"
-      private-2c = "sbn-tf-private-2a"
+      private-2c = "sbn-tf-private-2c"
     }
   }
 }
