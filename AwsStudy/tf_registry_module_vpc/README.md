@@ -10,6 +10,7 @@
 5. Routing tables
 
 ### 실행방법
+module = https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest
 1. secret.auto.tfvars 생성 후 아래 변수 입력 후 저장  
 ```
     access_key = "your AWS access key"
