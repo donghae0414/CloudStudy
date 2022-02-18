@@ -7,6 +7,7 @@
 2. Subnets (2 public subnets, 2 private subnets)
 3. Internet Gateway
 4. Nat Gateway, eip
+5. Routing tables
 
 ### 실행방법
 1. secret.auto.tfvars 생성 후 아래 변수 입력 후 저장  
