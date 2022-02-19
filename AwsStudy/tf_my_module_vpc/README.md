@@ -31,10 +31,11 @@ module = ./vpc
         one_external_nat_per_az = true
     }
 ```
-3. 작동방식  
+3. 작동방식
+  
 | 변수 | 설명 |  
 | :------------- | :------------- |  
-| subnet_cidrs, subnet_azs, subnet_names | 는 각각 list index에 따라 일대일 대응된다. |  
+| subnet_cidrs, subnet_azs, subnet_names | 각각 list index에 따라 일대일 대응된다. |  
 | create_external_nat(bool) | private subnet에 외부 nat를 연결시킬 지 |  
 | one_external_nat_per_az(bool) | AZ별로 nat를 생성할 것인지 |  
 
