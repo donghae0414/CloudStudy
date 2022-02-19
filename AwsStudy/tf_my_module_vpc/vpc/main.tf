@@ -50,7 +50,7 @@ resource "aws_default_route_table" "rt-public" {
 resource "aws_subnet" "sbn-private" {
   count = length(var.private_subnet_cidrs)
 
-vpc_id = aws_vpc.vpc.id
+  vpc_id            = aws_vpc.vpc.id
   cidr_block        = var.private_subnet_cidrs[count.index]
   availability_zone = var.private_subnet_azs[count.index]
   tags = {
@@ -75,23 +75,27 @@ resource "aws_nat_gateway" "nat" {
 }
 
 resource "aws_route_table" "rt-private" {
-  count = var.create_external_nat == false ? 0 : local.nat_gateway_count
+  count = var.create_external_nat == false ? 1 : local.nat_gateway_count
 
   vpc_id = aws_vpc.vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = element(aws_nat_gateway.nat[*].id, count.index)
-  }
 
   tags = {
     Name = "${var.rt_private_name}-${count.index}"
   }
 }
 
-resource "aws_route_table_association" "private" {
-    count = length(var.private_subnet_cidrs) > local.nat_gateway_count ? length(var.private_subnet_cidrs) : local.nat_gateway_count
+resource "aws_route" "private_nat_gateway" {
+  count = var.create_external_nat == false ? 0 : local.nat_gateway_count
 
-    subnet_id = element(aws_subnet.sbn-private[*].id, count.index)
-    route_table_id = element(aws_route_table.rt-private[*].id, var.one_external_nat_per_az ? count.index : 0)
+  route_table_id = element(aws_route_table.rt-private[*].id, count.index)
+  destination_cidr_block     = "0.0.0.0/0"
+  nat_gateway_id = element(aws_nat_gateway.nat[*].id, count.index)
+
+}
+
+resource "aws_route_table_association" "private" {
+  count = length(var.private_subnet_cidrs) > local.nat_gateway_count ? length(var.private_subnet_cidrs) : local.nat_gateway_count
+
+  subnet_id      = element(aws_subnet.sbn-private[*].id, count.index)
+  route_table_id = element(aws_route_table.rt-private[*].id, var.create_external_nat == false ? 0 : var.one_external_nat_per_az ? count.index : 0)
 }
